@@ -261,6 +261,8 @@ class Swagger2Postman
                         } else {
                             if (isset($value['example'])) {
                                 $tmpValue = $value['example'];
+                            } elseif (isset($value['default'])) {
+                                $tmpValue = $value['default'];
                             } else {
                                 $tmpValue = '';
                             }

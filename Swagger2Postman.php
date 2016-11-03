@@ -81,13 +81,15 @@ class Swagger2Postman
         /**
          * 循环文件夹
          */
-        foreach ($array['tags'] as $tag) {
-            $tmp['name'] = $tag['name'];
-            $tmp['description'] = $tag['description'];
+        if (isset($array['tags'])) {
+            foreach ($array['tags'] as $tag) {
+                $tmp['name'] = $tag['name'];
+                $tmp['description'] = $tag['description'];
 
-            $this->array->item[$tag['name']] = $tmp;
+                $this->array->item[$tag['name']] = $tmp;
 
-            unset($tmp);
+                unset($tmp);
+            }
         }
 
         /**
@@ -98,7 +100,7 @@ class Swagger2Postman
 
             foreach ($items as $method => $item) {
                 foreach ($item['tags'] as $tag) {
-                    $this->array->item[$tag]['item'][$path]['item'][$method]['name'] = $item['summary'];
+                    $this->array->item[$tag]['item'][$path]['item'][$method]['name'] = isset($item['summary']) ? $item['summary'] : 'nil';
                     $this->array->item[$tag]['item'][$path]['item'][$method]['request'] = $tmp;
                     $this->array->item[$tag]['item'][$path]['item'][$method]['request']['method'] = $method;
                     if (count($item['parameters']) == 1) {
@@ -252,77 +254,81 @@ class Swagger2Postman
         $refs = explode('/', $ref);
         unset($ref);
         $name = $refs[count($refs) - 1];
-        switch ($array['definitions'][$name]['type']) {
-            case 'object':
-                $tmp = new \stdClass();
-                foreach ($array['definitions'][$name]['properties'] as $key => $value) {
-                    if (isset($value['$ref'])) {
-                        $tmp->$key = $this->convertModel($array, $value['$ref'], false);
-                    } else {
-                        if (isset($value['example'])) {
-                            $tmpValue = $value['example'];
+        if (isset($array['definitions'][$name]['type'])) {
+            switch ($array['definitions'][$name]['type']) {
+                case 'object':
+                    $tmp = new \stdClass();
+                    foreach ($array['definitions'][$name]['properties'] as $key => $value) {
+                        if (isset($value['$ref'])) {
+                            $tmp->$key = $this->convertModel($array, $value['$ref'], false);
                         } else {
-                            $tmpValue = '';
+                            if (isset($value['example'])) {
+                                $tmpValue = $value['example'];
+                            } else {
+                                $tmpValue = '';
+                            }
+                            switch ($value['type']) {
+                                case 'integer':
+                                    $tmp->$key = (integer)$tmpValue;
+                                    break;
+                                case 'boolean':
+                                    $tmp->$key = (integer)$tmpValue;
+                                    break;
+                                case 'array':
+                                    if (isset($value['xml']['name'])) {
+                                        $tmpVal[][$value['xml']['name']] = (String)$tmpValue;
+                                    } else {
+                                        $tmpVal[] = (String)$tmpValue;
+                                    }
+                                    $tmp->$key = $tmpVal;
+                                    unset($tmpVal);
+                                    break;
+                                default:
+                                    $tmp->$key = (String)$tmpValue;
+                            }
+                            unset($tmpValue);
                         }
-                        switch ($value['type']) {
-                            case 'integer':
-                                $tmp->$key = (integer)$tmpValue;
-                                break;
-                            case 'boolean':
-                                $tmp->$key = (integer)$tmpValue;
-                                break;
-                            case 'array':
-                                if (isset($value['xml']['name'])) {
-                                    $tmpVal[][$value['xml']['name']] = (String)$tmpValue;
-                                } else {
-                                    $tmpVal[] = (String)$tmpValue;
-                                }
-                                $tmp->$key = $tmpVal;
-                                unset($tmpVal);
-                                break;
-                            default:
-                                $tmp->$key = (String)$tmpValue;
-                        }
-                        unset($tmpValue);
                     }
-                }
-                break;
-            case 'array':
-                $tmp = array();
-                foreach ($array['definitions'][$name]['properties'] as $key => $value) {
-                    if (isset($value['$ref'])) {
-                        $tmp[]->$key = $this->convertModel($array, $value['$ref']);
-                    } else {
-                        if (isset($value['example'])) {
-                            $tmpValue = $value['example'];
+                    break;
+                case 'array':
+                    $tmp = array();
+                    foreach ($array['definitions'][$name]['properties'] as $key => $value) {
+                        if (isset($value['$ref'])) {
+                            $tmp[]->$key = $this->convertModel($array, $value['$ref']);
                         } else {
-                            $tmpValue = '';
+                            if (isset($value['example'])) {
+                                $tmpValue = $value['example'];
+                            } else {
+                                $tmpValue = '';
+                            }
+                            switch ($value['type']) {
+                                case 'integer':
+                                    $tmp[]->$key = (integer)$tmpValue;
+                                    break;
+                                case 'boolean':
+                                    $tmp[]->$key = (integer)$tmpValue;
+                                    break;
+                                case 'array':
+                                    if (isset($value['xml']['name'])) {
+                                        $tmpVal[][$value['xml']['name']] = (String)$tmpValue;
+                                    } else {
+                                        $tmpVal[] = (String)$tmpValue;
+                                    }
+                                    $tmp[]->$key = $tmpVal;
+                                    unset($tmpVal);
+                                    break;
+                                default:
+                                    $tmp[]->$key = (String)$tmpValue;
+                            }
+                            unset($tmpValue);
                         }
-                        switch ($value['type']) {
-                            case 'integer':
-                                $tmp[]->$key = (integer)$tmpValue;
-                                break;
-                            case 'boolean':
-                                $tmp[]->$key = (integer)$tmpValue;
-                                break;
-                            case 'array':
-                                if (isset($value['xml']['name'])) {
-                                    $tmpVal[][$value['xml']['name']] = (String)$tmpValue;
-                                } else {
-                                    $tmpVal[] = (String)$tmpValue;
-                                }
-                                $tmp[]->$key = $tmpVal;
-                                unset($tmpVal);
-                                break;
-                            default:
-                                $tmp[]->$key = (String)$tmpValue;
-                        }
-                        unset($tmpValue);
                     }
-                }
-                break;
-            default:
-                $tmp = array();
+                    break;
+                default:
+                    $tmp = array();
+            }
+        } else {
+            $tmp = array();
         }
         if ($isJson) {
             return json_encode($tmp, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);

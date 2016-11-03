@@ -1,0 +1,21 @@
+{
+  "name": "frowhy/swagger2postman",
+  "license": "MIT",
+  "description": "Swagger Json Convert To Postman Json",
+  "type": "library",
+  "authors": [
+    {
+      "name": "frowhy",
+      "email": "frowhy@gmail.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "ramsey/uuid": "^3.5"
+  },
+  "autoload": {
+    "files": [
+      "Swagger2Postman.php"
+    ]
+  }
+}

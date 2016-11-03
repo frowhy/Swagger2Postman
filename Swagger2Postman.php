@@ -11,21 +11,48 @@ use Ramsey\Uuid\Uuid;
  */
 class Swagger2Postman
 {
-    var $swagger, $array;
-    var $schemes, $host, $basePath;
+    private $swagger, $array;
+    private $schemes, $host, $basePath;
+    private $json;
 
-    public function setSwagger($json)
+    public function openFile($filename)
     {
-        $this->swagger = $json;
+        $handle = fopen($filename, 'r');
+        $this->swagger = fread($handle, filesize($filename));
+        fclose($handle);
+        unset($handle);
         return $this;
+    }
+
+    public function writeFile($filename)
+    {
+        if (!empty($this->json)) {
+            $handle = fopen($filename, 'w');
+            $state = fwrite($handle, $this->json);
+            fclose($handle);
+            unset($handle);
+            return $state;
+        } else {
+            return false;
+        }
     }
 
     public function getPostman()
     {
+        if (!empty($this->json)) {
+            return $this->json;
+        } else {
+            return false;
+        }
+    }
+
+    public function convertPostman()
+    {
         $array = $this->convertJson($this->swagger);
-        $this->setPostman($array);
+        $this->json = $this->setPostman($array);
 
         unset($array);
+        return $this;
     }
 
     protected function convertJson($json)
@@ -38,6 +65,7 @@ class Swagger2Postman
         /**
          * 定义接口信息
          */
+        $this->array = new \stdClass();
         $this->array->info['name'] = $array['info']['title'];
         $this->array->info['_postman_id'] = Uuid::uuid4();
         $this->array->info['description'] = $array['info']['description'];
@@ -200,10 +228,12 @@ class Swagger2Postman
         unset($array);
         foreach ($this->array->item as $tag => $value) {
             foreach ($this->array->item[$tag]['item'] as $k => $_) {
-                $tmp = $this->array->item[$tag]['item'][$k]['item'];
-                $this->array->item[$tag]['item'][$k]['item'] = array();
-                foreach ($tmp as $v) {
-                    $this->array->item[$tag]['item'][] = $v;
+                if (isset($this->array->item[$tag]['item'][$k]['item'])) {
+                    $tmp = $this->array->item[$tag]['item'][$k]['item'];
+                    $this->array->item[$tag]['item'][$k]['item'] = array();
+                    foreach ($tmp as $v) {
+                        $this->array->item[$tag]['item'][] = $v;
+                    }
                 }
             }
             foreach ($this->array->item[$tag]['item'] as $k => $_) {
@@ -214,7 +244,7 @@ class Swagger2Postman
             $this->array->item[$tag]['item'] = array_values($this->array->item[$tag]['item']);
         }
         $this->array->item = array_values($this->array->item);
-        echo json_encode($this->array);
+        return json_encode($this->array);
     }
 
     protected function convertModel($array, $ref, $isJson = true)

@@ -256,40 +256,6 @@ class Swagger2Postman
         $name = $refs[count($refs) - 1];
         if (isset($array['definitions'][$name]['type'])) {
             switch ($array['definitions'][$name]['type']) {
-                case 'object':
-                    $tmp = new \stdClass();
-                    foreach ($array['definitions'][$name]['properties'] as $key => $value) {
-                        if (isset($value['$ref'])) {
-                            $tmp->$key = $this->convertModel($array, $value['$ref'], false);
-                        } else {
-                            if (isset($value['example'])) {
-                                $tmpValue = $value['example'];
-                            } else {
-                                $tmpValue = '';
-                            }
-                            switch ($value['type']) {
-                                case 'integer':
-                                    $tmp->$key = (integer)$tmpValue;
-                                    break;
-                                case 'boolean':
-                                    $tmp->$key = (integer)$tmpValue;
-                                    break;
-                                case 'array':
-                                    if (isset($value['xml']['name'])) {
-                                        $tmpVal[][$value['xml']['name']] = (String)$tmpValue;
-                                    } else {
-                                        $tmpVal[] = (String)$tmpValue;
-                                    }
-                                    $tmp->$key = $tmpVal;
-                                    unset($tmpVal);
-                                    break;
-                                default:
-                                    $tmp->$key = (String)$tmpValue;
-                            }
-                            unset($tmpValue);
-                        }
-                    }
-                    break;
                 case 'array':
                     $tmp = array();
                     foreach ($array['definitions'][$name]['properties'] as $key => $value) {
@@ -325,7 +291,38 @@ class Swagger2Postman
                     }
                     break;
                 default:
-                    $tmp = array();
+                    $tmp = new \stdClass();
+                    foreach ($array['definitions'][$name]['properties'] as $key => $value) {
+                        if (isset($value['$ref'])) {
+                            $tmp->$key = $this->convertModel($array, $value['$ref'], false);
+                        } else {
+                            if (isset($value['example'])) {
+                                $tmpValue = $value['example'];
+                            } else {
+                                $tmpValue = '';
+                            }
+                            switch ($value['type']) {
+                                case 'integer':
+                                    $tmp->$key = (integer)$tmpValue;
+                                    break;
+                                case 'boolean':
+                                    $tmp->$key = (integer)$tmpValue;
+                                    break;
+                                case 'array':
+                                    if (isset($value['xml']['name'])) {
+                                        $tmpVal[][$value['xml']['name']] = (String)$tmpValue;
+                                    } else {
+                                        $tmpVal[] = (String)$tmpValue;
+                                    }
+                                    $tmp->$key = $tmpVal;
+                                    unset($tmpVal);
+                                    break;
+                                default:
+                                    $tmp->$key = (String)$tmpValue;
+                            }
+                            unset($tmpValue);
+                        }
+                    }
             }
         } else {
             $tmp = array();

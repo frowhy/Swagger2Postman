@@ -2,7 +2,7 @@
 
 ## Installation
 
-The preferred method of installation is via [Packagist][] and [Composer][]. Run the following command to install the package and add it as a requirement to your project's `composer.json`:
+The preferred method of installation is via [Packagist](https://packagist.org/) and [Composer](https://getcomposer.org/). Run the following command to install the package and add it as a requirement to your project's `composer.json`:
 
 ```bash
 composer require frowhy/swagger2postman

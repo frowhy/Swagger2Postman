@@ -101,6 +101,7 @@ class Swagger2Postman
             foreach ($items as $method => $item) {
                 foreach ($item['tags'] as $tag) {
                     $this->array->item[$tag]['item'][$path]['item'][$method]['name'] = isset($item['summary']) ? $item['summary'] : 'nil';
+                    $this->array->item[$tag]['item'][$path]['item'][$method]['request']['description'] = isset($item['description']) ? $item['description'] : 'nil';
                     $this->array->item[$tag]['item'][$path]['item'][$method]['request'] = $tmp;
                     $this->array->item[$tag]['item'][$path]['item'][$method]['request']['method'] = $method;
                     if (count($item['parameters']) == 1) {
@@ -121,10 +122,6 @@ class Swagger2Postman
 
                             } else {
                                 $this->array->item[$tag]['item'][$path]['item'][$method]['request']['body']['raw'] = $this->convertModel($array, $item['parameters'][0]['schema']['$ref']);
-                            }
-
-                            if (isset($item['parameters'][0]['description'])) {
-                                $this->array->item[$tag]['item'][$path]['item'][$method]['request']['description'] = $item['parameters'][0]['description'];
                             }
                         } elseif ($item['parameters'][0]['in'] == 'query') {
                             if ($item['parameters'][0]['type'] == 'array') {

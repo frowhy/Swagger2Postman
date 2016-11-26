@@ -24,6 +24,12 @@ class Swagger2Postman
         return $this;
     }
 
+    public function setSwagger($json)
+    {
+        $this->swagger = $json;
+        return $this;
+    }
+
     public function writeFile($filename)
     {
         if (!empty($this->json)) {

@@ -110,6 +110,15 @@ class Swagger2Postman
                     $this->array->item[$tag]['item'][$path]['item'][$method]['request']['description'] = isset($item['description']) ? $item['description'] : 'nil';
                     $this->array->item[$tag]['item'][$path]['item'][$method]['request'] = $tmp;
                     $this->array->item[$tag]['item'][$path]['item'][$method]['request']['method'] = $method;
+                    if (isset($item['responses']['default']['headers'])) {
+                        foreach ($item['responses']['default']['headers'] as $key => $value) {
+                            $tmpArr['key'] = $key;
+                            $tmpArr['value'] = $value['format'];
+                            $tmpArr['description'] = $value['description'];
+                            $this->array->item[$tag]['item'][$path]['item'][$method]['request']['header'][] = $tmpArr;
+                            unset($tmpArr);
+                        }
+                    }
                     if (count($item['parameters']) == 1) {
                         if ($item['parameters'][0]['in'] == 'body' && (isset($item['parameters'][0]['schema']['$ref']) || isset($item['parameters'][0]['schema']['items']['$ref']))) {
                             $tmpArr['key'] = 'Content-Type';

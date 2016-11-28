@@ -21,6 +21,15 @@ $state = $swagger2Postman
     ->convertPostman()
     ->writeFile('postman.json');
 
+$handle = fopen('swagger.json', 'r');
+$swagger = fread($handle, filesize('swagger.json'));
+fclose($handle);
+$swagger2Postman = new Swagger2Postman();
+$state = $swagger2Postman
+    ->setSwagger($swagger)
+    ->convertPostman()
+    ->writeFile('postman.json');
+
 $postman = $swagger2Postman
     ->openFile('swagger.json')
     ->convertPostman()

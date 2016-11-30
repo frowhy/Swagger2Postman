@@ -232,7 +232,14 @@ class Swagger2Postman
                         unset($empty);
                     }
 
-                    $this->array->item[$tag]['item'][$path]['item'][$method]['response'] = array();
+                    if (isset($item['responses']['default']['schema'])) {
+
+                        $this->array->item[$tag]['item'][$path]['item'][$method]['event'][0]['listen'] = 'test';
+                        $this->array->item[$tag]['item'][$path]['item'][$method]['event'][0]['script']['type'] = 'application/json';
+
+                        $this->array->item[$tag]['item'][$path]['item'][$method]['event'][0]['script']['exec'][0] =
+                            $this->convertModel($array, $item['responses']['default']['schema']['$ref']);
+                    }
                 }
             }
 

@@ -1,1 +1,157 @@
-{"swagger":"2.0","info":{"title":"\u65e5\u8f6c\u7f51\u63a5\u53e3(\u65b0)","description":"\u65e5\u8f6c\u7f51\u65b0\u63a5\u53e3\u6587\u6863","version":"1.0.0"},"host":"api.intranet.com","basePath":"\/","schemes":["https","http"],"paths":{"test\/test":{"post":{"tags":["Test"],"summary":"\u6d4b\u8bd5","description":"Laravel+Dingo+Swagger","produces":["application\/json"],"parameters":[{"name":"body","in":"body","description":"\u6d4b\u8bd5\u4f20\u5165\u53c2\u6570","required":true,"schema":{"$ref":"#\/definitions\/ResponseBase"}}],"responses":{"default":{"description":"Successful","headers":{"Accept":{"description":"Dingo Accept","type":"string","format":"application\/vnd.tjp_api.v1+json"}}}}}},"user\/login":{"post":{"tags":["User"],"summary":"\u767b\u5f55","description":"Successful","produces":["application\/json"],"parameters":[{"name":"body","in":"body","required":true,"schema":{"$ref":"#\/definitions\/ParameterLogin"}}],"responses":{"default":{"description":"Successful","schema":{"$ref":"#\/definitions\/ResponseLogin"},"headers":{"Accept":{"description":"Dingo Accept","type":"string","format":"application\/vnd.tjp_api.v1+json"}}}}}}},"definitions":{"ParameterLogin":{"required":["account","password"],"properties":{"account":{"type":"string","example":"fififi"},"password":{"type":"string","example":"123456"}},"type":"object"},"ResponseBase":{"required":["message","status"],"properties":{"message":{"type":"string","default":"message"},"status":{"type":"integer","format":"int16","default":1}},"type":"object"},"ResponseLogin":{"required":["status_code","message"],"properties":{"errors_message":{"type":"array","example":"errors"},"message":{"type":"string","default":"message"},"status":{"type":"integer","format":"int16","default":1}},"type":"object"}},"tags":[{"name":"Test","description":"\u6d4b\u8bd5\u63a7\u5236\u5668"},{"name":"User","description":"\u7528\u6237\u63a7\u5236\u5668"}]}
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "\u65e5\u8f6c\u7f51\u63a5\u53e3(\u65b0)",
+    "description": "\u65e5\u8f6c\u7f51\u65b0\u63a5\u53e3\u6587\u6863",
+    "version": "1.0.0"
+  },
+  "host": "api.intranet.com",
+  "basePath": "\/",
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "test\/test": {
+      "post": {
+        "tags": [
+          "Test"
+        ],
+        "summary": "\u6d4b\u8bd5",
+        "description": "Laravel+Dingo+Swagger",
+        "produces": [
+          "application\/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "\u6d4b\u8bd5\u4f20\u5165\u53c2\u6570",
+            "required": true,
+            "schema": {
+              "$ref": "#\/definitions\/ResponseBase"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful",
+            "headers": {
+              "Accept": {
+                "description": "Dingo Accept",
+                "type": "string",
+                "format": "application\/vnd.tjp_api.v1+json"
+              }
+            }
+          }
+        }
+      }
+    },
+    "user\/login": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "\u767b\u5f55",
+        "description": "Successful",
+        "produces": [
+          "application\/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#\/definitions\/ParameterLogin"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful",
+            "schema": {
+              "$ref": "#\/definitions\/ResponseLogin"
+            },
+            "headers": {
+              "Accept": {
+                "description": "Dingo Accept",
+                "type": "string",
+                "format": "application\/vnd.tjp_api.v1+json"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ParameterLogin": {
+      "required": [
+        "account",
+        "password"
+      ],
+      "properties": {
+        "account": {
+          "type": "string",
+          "example": "fififi"
+        },
+        "password": {
+          "type": "string",
+          "example": "123456"
+        }
+      },
+      "type": "object"
+    },
+    "ResponseBase": {
+      "required": [
+        "message",
+        "status"
+      ],
+      "properties": {
+        "message": {
+          "type": "string",
+          "default": "message"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int16",
+          "default": 1
+        }
+      },
+      "type": "object"
+    },
+    "ResponseLogin": {
+      "required": [
+        "status_code",
+        "message"
+      ],
+      "properties": {
+        "errors_message": {
+          "type": "array",
+          "example": "errors"
+        },
+        "message": {
+          "type": "string",
+          "default": "message"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int16",
+          "default": 1
+        }
+      },
+      "type": "object"
+    }
+  },
+  "tags": [
+    {
+      "name": "Test",
+      "description": "\u6d4b\u8bd5\u63a7\u5236\u5668"
+    },
+    {
+      "name": "User",
+      "description": "\u7528\u6237\u63a7\u5236\u5668"
+    }
+  ]
+}

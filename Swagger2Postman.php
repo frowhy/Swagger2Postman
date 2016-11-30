@@ -107,9 +107,9 @@ class Swagger2Postman
             foreach ($items as $method => $item) {
                 foreach ($item['tags'] as $tag) {
                     $this->array->item[$tag]['item'][$path]['item'][$method]['name'] = isset($item['summary']) ? $item['summary'] : 'nil';
-                    $this->array->item[$tag]['item'][$path]['item'][$method]['request']['description'] = isset($item['description']) ? $item['description'] : 'nil';
                     $this->array->item[$tag]['item'][$path]['item'][$method]['request'] = $tmp;
                     $this->array->item[$tag]['item'][$path]['item'][$method]['request']['method'] = $method;
+                    $this->array->item[$tag]['item'][$path]['item'][$method]['request']['description'] = isset($item['description']) ? $item['description'] : 'nil';
                     if (isset($item['responses']['default']['headers'])) {
                         foreach ($item['responses']['default']['headers'] as $key => $value) {
                             $tmpArr['key'] = $key;

@@ -12,21 +12,23 @@ use Ramsey\Uuid\Uuid;
 class Swagger2Postman
 {
     private $swagger, $array;
-    private $schemes, $host, $basePath;
-    private $json;
+    private           $schemes, $host, $basePath;
+    private           $json;
 
     public function openFile($filename)
     {
-        $handle = fopen($filename, 'r');
+        $handle        = fopen($filename, 'r');
         $this->swagger = fread($handle, filesize($filename));
         fclose($handle);
         unset($handle);
+
         return $this;
     }
 
     public function setSwagger($json)
     {
         $this->swagger = $json;
+
         return $this;
     }
 
@@ -34,12 +36,13 @@ class Swagger2Postman
     {
         if (!empty($this->json)) {
             $handle = fopen($filename, 'w');
-            $state = fwrite($handle, $this->json);
+            $state  = fwrite($handle, $this->json);
             fclose($handle);
             unset($handle);
+
             return $state;
         } else {
-            return false;
+            return FALSE;
         }
     }
 
@@ -48,22 +51,23 @@ class Swagger2Postman
         if (!empty($this->json)) {
             return $this->json;
         } else {
-            return false;
+            return FALSE;
         }
     }
 
     public function convertPostman()
     {
-        $array = $this->convertJson($this->swagger);
+        $array      = $this->convertJson($this->swagger);
         $this->json = $this->setPostman($array);
 
         unset($array);
+
         return $this;
     }
 
     protected function convertJson($json)
     {
-        return json_decode($json, true);
+        return json_decode($json, TRUE);
     }
 
     protected function setPostman($array)
@@ -71,17 +75,17 @@ class Swagger2Postman
         /**
          * 定义接口信息
          */
-        $this->array = new \stdClass();
-        $this->array->info['name'] = $array['info']['title'];
+        $this->array                      = new \stdClass();
+        $this->array->info['name']        = $array['info']['title'];
         $this->array->info['_postman_id'] = Uuid::uuid4();
         $this->array->info['description'] = $array['info']['description'];
-        $this->array->info['schema'] = 'https://schema.getpostman.com/json/collection/v2.0.0/collection.json';
+        $this->array->info['schema']      = 'https://schema.getpostman.com/json/collection/v2.0.0/collection.json';
 
         /**
          * 定义网址前缀
          */
-        $this->schemes = $array['schemes'][0];
-        $this->host = $array['host'];
+        $this->schemes  = $array['schemes'][0];
+        $this->host     = $array['host'];
         $this->basePath = $array['basePath'];
 
         /**
@@ -89,10 +93,10 @@ class Swagger2Postman
          */
         if (isset($array['tags'])) {
             foreach ($array['tags'] as $tag) {
-                $tmp['name'] = $tag['name'];
+                $tmp['name']        = $tag['name'];
                 $tmp['description'] = $tag['description'];
 
-                $this->array->item[$tag['name']] = $tmp;
+                $this->array->item[ $tag['name'] ] = $tmp;
 
                 unset($tmp);
             }
@@ -106,50 +110,45 @@ class Swagger2Postman
 
             foreach ($items as $method => $item) {
                 foreach ($item['tags'] as $tag) {
-                    $this->array->item[$tag]['item'][$path]['item'][$method]['name'] = isset($item['summary']) ? $item['summary'] : 'nil';
-                    $this->array->item[$tag]['item'][$path]['item'][$method]['request'] = $tmp;
-                    $this->array->item[$tag]['item'][$path]['item'][$method]['request']['method'] = $method;
-                    $this->array->item[$tag]['item'][$path]['item'][$method]['request']['description'] = isset($item['description']) ? $item['description'] : 'nil';
+                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['name']                   = isset($item['summary']) ? $item['summary'] : 'nil';
+                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']                = $tmp;
+                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['method']      = $method;
+                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['description'] = isset($item['description']) ? $item['description'] : 'nil';
                     if (isset($item['responses']['default']['headers'])) {
                         foreach ($item['responses']['default']['headers'] as $key => $value) {
-                            $tmpArr['key'] = $key;
-                            $tmpArr['value'] = $value['format'];
-                            $tmpArr['description'] = $value['description'];
-                            $this->array->item[$tag]['item'][$path]['item'][$method]['request']['header'][] = $tmpArr;
+                            $tmpArr['key']                                                                        = $key;
+                            $tmpArr['value']                                                                      = $value['format'];
+                            $tmpArr['description']                                                                = $value['description'];
+                            $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['header'][] = $tmpArr;
                             unset($tmpArr);
                         }
                     }
                     if (count($item['parameters']) == 1) {
                         if ($item['parameters'][0]['in'] == 'body' && (isset($item['parameters'][0]['schema']['$ref']) || isset($item['parameters'][0]['schema']['items']['$ref']))) {
-                            $tmpArr['key'] = 'Content-Type';
-                            $tmpArr['value'] = 'application/json';
-                            $tmpArr['description'] = '';
-                            $this->array->item[$tag]['item'][$path]['item'][$method]['request']['header'][] = $tmpArr;
-                            unset($tmpArr);
-                            $this->array->item[$tag]['item'][$path]['item'][$method]['request']['body']['mode'] = 'raw';
+                            $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode'] = 'raw';
                             if (isset($item['parameters'][0]['schema']['type']) && $item['parameters'][0]['schema']['type'] == 'array') {
-                                $tmpArr = array();
+                                $tmpArr = [];
                                 foreach ($item['parameters'][0]['schema']['items'] as $_item) {
-                                    $tmpArr[] = $this->convertModel($array, $_item, false);
+                                    $tmpArr[] = $this->convertModel($array, $_item, FALSE);
 
                                 }
-                                $this->array->item[$tag]['item'][$path]['item'][$method]['request']['body']['raw'] = json_encode($tmpArr, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+                                $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['raw'] = json_encode($tmpArr, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
                             } else {
-                                $this->array->item[$tag]['item'][$path]['item'][$method]['request']['body']['raw'] = $this->convertModel($array, $item['parameters'][0]['schema']['$ref']);
+                                $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['raw'] = $this->convertModel($array, $item['parameters'][0]['schema']['$ref']);
                             }
                         } elseif ($item['parameters'][0]['in'] == 'query') {
                             if ($item['parameters'][0]['type'] == 'array') {
                                 if (isset($item['parameters'][0]['items']) && isset($item['parameters'][0]['items']['enum'])) {
-                                    $tmpArr['key'] = 'Content-Type';
-                                    $tmpArr['value'] = 'application/x-www-form-urlencoded';
-                                    $tmpArr['description'] = '';
-                                    $this->array->item[$tag]['item'][$path]['item'][$method]['request']['header'][] = $tmpArr;
+                                    $tmpArr['key']                                                                        = 'Content-Type';
+                                    $tmpArr['value']                                                                      = 'application/x-www-form-urlencoded';
+                                    $tmpArr['description']                                                                = '';
+                                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['header'][] = $tmpArr;
                                     unset($tmpArr);
-                                    $this->array->item[$tag]['item'][$path]['item'][$method]['request']['body']['mode'] = 'urlencoded';
-                                    $tmpArr = array();
+                                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode'] = 'urlencoded';
+                                    $tmpArr                                                                                   = [];
                                     foreach ($item['parameters'][0]['items']['enum'] as $enum) {
-                                        $tmpObj = new \stdClass();
+                                        $tmpObj      = new \stdClass();
                                         $tmpObj->key = $item['parameters'][0]['name'];
                                         switch ($item['parameters'][0]['items']['type']) {
                                             case 'integer':
@@ -163,24 +162,24 @@ class Swagger2Postman
                                         }
                                         $tmpObj->type = 'text';
                                         if ($enum == $item['parameters'][0]['items']['default']) {
-                                            $tmpObj->enabled = true;
+                                            $tmpObj->enabled = TRUE;
                                         } else {
-                                            $tmpObj->enabled = false;
+                                            $tmpObj->enabled = FALSE;
                                         }
                                         $tmpArr[] = $tmpObj;
                                     }
-                                    $this->array->item[$tag]['item'][$path]['item'][$method]['request']['body']['urlencoded'] = $tmpArr;
+                                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['urlencoded'] = $tmpArr;
                                     unset($tmpArr);
                                 } else {
-                                    $tmpArr['key'] = 'Content-Type';
-                                    $tmpArr['value'] = 'application/x-www-form-urlencoded';
-                                    $tmpArr['description'] = '';
-                                    $this->array->item[$tag]['item'][$path]['item'][$method]['request']['header'][] = $tmpArr;
+                                    $tmpArr['key']                                                                        = 'Content-Type';
+                                    $tmpArr['value']                                                                      = 'application/x-www-form-urlencoded';
+                                    $tmpArr['description']                                                                = '';
+                                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['header'][] = $tmpArr;
                                     unset($tmpArr);
-                                    $this->array->item[$tag]['item'][$path]['item'][$method]['request']['body']['mode'] = 'urlencoded';
-                                    $tmpArr = array();
-                                    $tmpObj = new \stdClass();
-                                    $tmpObj->key = $item['parameters'][0]['name'];
+                                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode'] = 'urlencoded';
+                                    $tmpArr                                                                                   = [];
+                                    $tmpObj                                                                                   = new \stdClass();
+                                    $tmpObj->key                                                                              = $item['parameters'][0]['name'];
                                     switch ($item['parameters'][0]['items']['type']) {
                                         case 'integer':
                                             $tmpObj->value = (integer)'';
@@ -191,26 +190,26 @@ class Swagger2Postman
                                         default:
                                             $tmpObj->value = '';
                                     }
-                                    $tmpObj->type = 'text';
-                                    $tmpObj->enabled = true;
-                                    $tmpArr[] = $tmpObj;
+                                    $tmpObj->type    = 'text';
+                                    $tmpObj->enabled = TRUE;
+                                    $tmpArr[]        = $tmpObj;
 
-                                    $this->array->item[$tag]['item'][$path]['item'][$method]['request']['body']['urlencoded'] = $tmpArr;
+                                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['urlencoded'] = $tmpArr;
                                 }
                             }
                         } elseif ($item['parameters'][0]['in'] == 'path') {
-                            $this->array->item[$tag]['item'][$path]['item'][$method]['request']['header'] = array();
-                            $this->array->item[$tag]['item'][$path]['item'][$method]['request']['body']['mode'] = 'formdata';
-                            $this->array->item[$tag]['item'][$path]['item'][$method]['request']['body']['formdata'] = array();
+                            $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['header']           = [];
+                            $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode']     = 'formdata';
+                            $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['formdata'] = [];
                         }
                     } else {
-                        $this->array->item[$tag]['item'][$path]['item'][$method]['request']['header'] = array();
-                        $this->array->item[$tag]['item'][$path]['item'][$method]['request']['body']['mode'] = 'formdata';
-                        $tmpArr = array();
-                        $empty = '';
+                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['header']       = [];
+                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode'] = 'formdata';
+                        $tmpArr                                                                                   = [];
+                        $empty                                                                                    = '';
                         foreach ($item['parameters'] as $parameter) {
                             if ($parameter['in'] == 'formData') {
-                                $tmpObj = new \stdClass();
+                                $tmpObj      = new \stdClass();
                                 $tmpObj->key = $parameter['name'];
                                 switch ($parameter['type']) {
                                     case 'integer':
@@ -222,22 +221,22 @@ class Swagger2Postman
                                     default:
                                         $tmpObj->value = $parameter['description'];
                                 }
-                                $tmpObj->type = 'text';
+                                $tmpObj->type    = 'text';
                                 $tmpObj->enabled = $parameter['required'];
-                                $tmpArr[] = $tmpObj;
+                                $tmpArr[]        = $tmpObj;
                             }
                         }
-                        $this->array->item[$tag]['item'][$path]['item'][$method]['request']['body']['formdata'] = $tmpArr;
+                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['formdata'] = $tmpArr;
                         unset($tmpArr);
                         unset($empty);
                     }
 
                     if (isset($item['responses']['default']['schema'])) {
 
-                        $this->array->item[$tag]['item'][$path]['item'][$method]['event'][0]['listen'] = 'test';
-                        $this->array->item[$tag]['item'][$path]['item'][$method]['event'][0]['script']['type'] = 'application/json';
+                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['event'][0]['listen']         = 'test';
+                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['event'][0]['script']['type'] = 'application/json';
 
-                        $this->array->item[$tag]['item'][$path]['item'][$method]['event'][0]['script']['exec'][0] =
+                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['event'][0]['script']['exec'][0] =
                             $this->convertModel($array, $item['responses']['default']['schema']['$ref']);
                     }
                 }
@@ -248,36 +247,37 @@ class Swagger2Postman
 
         unset($array);
         foreach ($this->array->item as $tag => $value) {
-            foreach ($this->array->item[$tag]['item'] as $k => $_) {
-                if (isset($this->array->item[$tag]['item'][$k]['item'])) {
-                    $tmp = $this->array->item[$tag]['item'][$k]['item'];
-                    $this->array->item[$tag]['item'][$k]['item'] = array();
+            foreach ($this->array->item[ $tag ]['item'] as $k => $_) {
+                if (isset($this->array->item[ $tag ]['item'][ $k ]['item'])) {
+                    $tmp                                             = $this->array->item[ $tag ]['item'][ $k ]['item'];
+                    $this->array->item[ $tag ]['item'][ $k ]['item'] = [];
                     foreach ($tmp as $v) {
-                        $this->array->item[$tag]['item'][] = $v;
+                        $this->array->item[ $tag ]['item'][] = $v;
                     }
                 }
             }
-            foreach ($this->array->item[$tag]['item'] as $k => $_) {
+            foreach ($this->array->item[ $tag ]['item'] as $k => $_) {
                 if (isset($_['item'])) {
-                    unset($this->array->item[$tag]['item'][$k]);
+                    unset($this->array->item[ $tag ]['item'][ $k ]);
                 }
             }
-            $this->array->item[$tag]['item'] = array_values($this->array->item[$tag]['item']);
+            $this->array->item[ $tag ]['item'] = array_values($this->array->item[ $tag ]['item']);
         }
         $this->array->item = array_values($this->array->item);
+
         return json_encode($this->array);
     }
 
-    protected function convertModel($array, $ref, $isJson = true)
+    protected function convertModel($array, $ref, $isJson = TRUE)
     {
         $refs = explode('/', $ref);
         unset($ref);
-        $name = $refs[count($refs) - 1];
-        if (isset($array['definitions'][$name]['type'])) {
-            switch ($array['definitions'][$name]['type']) {
+        $name = $refs[ count($refs) - 1 ];
+        if (isset($array['definitions'][ $name ]['type'])) {
+            switch ($array['definitions'][ $name ]['type']) {
                 case 'array':
-                    $tmp = array();
-                    foreach ($array['definitions'][$name]['properties'] as $key => $value) {
+                    $tmp = [];
+                    foreach ($array['definitions'][ $name ]['properties'] as $key => $value) {
                         if (isset($value['$ref'])) {
                             $tmp[]->$key = $this->convertModel($array, $value['$ref']);
                         } else {
@@ -297,7 +297,7 @@ class Swagger2Postman
                                     break;
                                 case 'array':
                                     if (isset($value['xml']['name'])) {
-                                        $tmpVal[][$value['xml']['name']] = (String)$tmpValue;
+                                        $tmpVal[][ $value['xml']['name'] ] = (String)$tmpValue;
                                     } else {
                                         $tmpVal[] = (String)$tmpValue;
                                     }
@@ -313,42 +313,44 @@ class Swagger2Postman
                     break;
                 default:
                     $tmp = new \stdClass();
-                    foreach ($array['definitions'][$name]['properties'] as $key => $value) {
-                        if (isset($value['$ref'])) {
-                            $tmp->$key = $this->convertModel($array, $value['$ref'], false);
-                        } else {
-                            if (isset($value['example'])) {
-                                $tmpValue = $value['example'];
-                            } elseif (isset($value['default'])) {
-                                $tmpValue = $value['default'];
+                    if (isset($array['definitions'][ $name ]['properties'])) {
+                        foreach ($array['definitions'][ $name ]['properties'] as $key => $value) {
+                            if (isset($value['$ref'])) {
+                                $tmp->$key = $this->convertModel($array, $value['$ref'], FALSE);
                             } else {
-                                $tmpValue = '';
+                                if (isset($value['example'])) {
+                                    $tmpValue = $value['example'];
+                                } elseif (isset($value['default'])) {
+                                    $tmpValue = $value['default'];
+                                } else {
+                                    $tmpValue = '';
+                                }
+                                switch ($value['type']) {
+                                    case 'integer':
+                                        $tmp->$key = (integer)$tmpValue;
+                                        break;
+                                    case 'boolean':
+                                        $tmp->$key = (integer)$tmpValue;
+                                        break;
+                                    case 'array':
+                                        if (isset($value['xml']['name'])) {
+                                            $tmpVal[][ $value['xml']['name'] ] = (String)$tmpValue;
+                                        } else {
+                                            $tmpVal[] = (String)$tmpValue;
+                                        }
+                                        $tmp->$key = $tmpVal;
+                                        unset($tmpVal);
+                                        break;
+                                    default:
+                                        $tmp->$key = (String)$tmpValue;
+                                }
+                                unset($tmpValue);
                             }
-                            switch ($value['type']) {
-                                case 'integer':
-                                    $tmp->$key = (integer)$tmpValue;
-                                    break;
-                                case 'boolean':
-                                    $tmp->$key = (integer)$tmpValue;
-                                    break;
-                                case 'array':
-                                    if (isset($value['xml']['name'])) {
-                                        $tmpVal[][$value['xml']['name']] = (String)$tmpValue;
-                                    } else {
-                                        $tmpVal[] = (String)$tmpValue;
-                                    }
-                                    $tmp->$key = $tmpVal;
-                                    unset($tmpVal);
-                                    break;
-                                default:
-                                    $tmp->$key = (String)$tmpValue;
-                            }
-                            unset($tmpValue);
                         }
                     }
             }
         } else {
-            $tmp = array();
+            $tmp = [];
         }
         if ($isJson) {
             return json_encode($tmp, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);

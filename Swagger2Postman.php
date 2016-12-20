@@ -123,112 +123,114 @@ class Swagger2Postman
                             unset($tmpArr);
                         }
                     }
-                    if (count($item['parameters']) == 1) {
-                        if ($item['parameters'][0]['in'] == 'body' && (isset($item['parameters'][0]['schema']['$ref']) || isset($item['parameters'][0]['schema']['items']['$ref']))) {
-                            $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode'] = 'raw';
-                            if (isset($item['parameters'][0]['schema']['type']) && $item['parameters'][0]['schema']['type'] == 'array') {
-                                $tmpArr = [];
-                                foreach ($item['parameters'][0]['schema']['items'] as $_item) {
-                                    $tmpArr[] = $this->convertModel($array, $_item, FALSE);
+                    if (isset($item['parameters'])) {
+                        if (count($item['parameters']) == 1) {
+                            if ($item['parameters'][0]['in'] == 'body' && (isset($item['parameters'][0]['schema']['$ref']) || isset($item['parameters'][0]['schema']['items']['$ref']))) {
+                                $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode'] = 'raw';
+                                if (isset($item['parameters'][0]['schema']['type']) && $item['parameters'][0]['schema']['type'] == 'array') {
+                                    $tmpArr = [];
+                                    foreach ($item['parameters'][0]['schema']['items'] as $_item) {
+                                        $tmpArr[] = $this->convertModel($array, $_item, FALSE);
 
+                                    }
+                                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['raw'] = json_encode($tmpArr, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+                                } else {
+                                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['raw'] = $this->convertModel($array, $item['parameters'][0]['schema']['$ref']);
                                 }
-                                $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['raw'] = json_encode($tmpArr, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-
-                            } else {
-                                $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['raw'] = $this->convertModel($array, $item['parameters'][0]['schema']['$ref']);
-                            }
-                        } elseif ($item['parameters'][0]['in'] == 'query') {
-                            if ($item['parameters'][0]['type'] == 'array') {
-                                if (isset($item['parameters'][0]['items']) && isset($item['parameters'][0]['items']['enum'])) {
-                                    $tmpArr['key']                                                                        = 'Content-Type';
-                                    $tmpArr['value']                                                                      = 'application/x-www-form-urlencoded';
-                                    $tmpArr['description']                                                                = '';
-                                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['header'][] = $tmpArr;
-                                    unset($tmpArr);
-                                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode'] = 'urlencoded';
-                                    $tmpArr                                                                                   = [];
-                                    foreach ($item['parameters'][0]['items']['enum'] as $enum) {
-                                        $tmpObj      = new \stdClass();
-                                        $tmpObj->key = $item['parameters'][0]['name'];
+                            } elseif ($item['parameters'][0]['in'] == 'query') {
+                                if ($item['parameters'][0]['type'] == 'array') {
+                                    if (isset($item['parameters'][0]['items']) && isset($item['parameters'][0]['items']['enum'])) {
+                                        $tmpArr['key']                                                                        = 'Content-Type';
+                                        $tmpArr['value']                                                                      = 'application/x-www-form-urlencoded';
+                                        $tmpArr['description']                                                                = '';
+                                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['header'][] = $tmpArr;
+                                        unset($tmpArr);
+                                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode'] = 'urlencoded';
+                                        $tmpArr                                                                                   = [];
+                                        foreach ($item['parameters'][0]['items']['enum'] as $enum) {
+                                            $tmpObj      = new \stdClass();
+                                            $tmpObj->key = $item['parameters'][0]['name'];
+                                            switch ($item['parameters'][0]['items']['type']) {
+                                                case 'integer':
+                                                    $tmpObj->value = (integer)$enum;
+                                                    break;
+                                                case 'boolean':
+                                                    $tmpObj->value = (boolean)$enum;
+                                                    break;
+                                                default:
+                                                    $tmpObj->value = $enum;
+                                            }
+                                            $tmpObj->type = 'text';
+                                            if ($enum == $item['parameters'][0]['items']['default']) {
+                                                $tmpObj->enabled = TRUE;
+                                            } else {
+                                                $tmpObj->enabled = FALSE;
+                                            }
+                                            $tmpArr[] = $tmpObj;
+                                        }
+                                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['urlencoded'] = $tmpArr;
+                                        unset($tmpArr);
+                                    } else {
+                                        $tmpArr['key']                                                                        = 'Content-Type';
+                                        $tmpArr['value']                                                                      = 'application/x-www-form-urlencoded';
+                                        $tmpArr['description']                                                                = '';
+                                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['header'][] = $tmpArr;
+                                        unset($tmpArr);
+                                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode'] = 'urlencoded';
+                                        $tmpArr                                                                                   = [];
+                                        $tmpObj                                                                                   = new \stdClass();
+                                        $tmpObj->key                                                                              = $item['parameters'][0]['name'];
                                         switch ($item['parameters'][0]['items']['type']) {
                                             case 'integer':
-                                                $tmpObj->value = (integer)$enum;
+                                                $tmpObj->value = (integer)'';
                                                 break;
                                             case 'boolean':
-                                                $tmpObj->value = (boolean)$enum;
+                                                $tmpObj->value = (boolean)'';
                                                 break;
                                             default:
-                                                $tmpObj->value = $enum;
+                                                $tmpObj->value = '';
                                         }
-                                        $tmpObj->type = 'text';
-                                        if ($enum == $item['parameters'][0]['items']['default']) {
-                                            $tmpObj->enabled = TRUE;
-                                        } else {
-                                            $tmpObj->enabled = FALSE;
-                                        }
-                                        $tmpArr[] = $tmpObj;
+                                        $tmpObj->type    = 'text';
+                                        $tmpObj->enabled = TRUE;
+                                        $tmpArr[]        = $tmpObj;
+
+                                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['urlencoded'] = $tmpArr;
                                     }
-                                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['urlencoded'] = $tmpArr;
-                                    unset($tmpArr);
-                                } else {
-                                    $tmpArr['key']                                                                        = 'Content-Type';
-                                    $tmpArr['value']                                                                      = 'application/x-www-form-urlencoded';
-                                    $tmpArr['description']                                                                = '';
-                                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['header'][] = $tmpArr;
-                                    unset($tmpArr);
-                                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode'] = 'urlencoded';
-                                    $tmpArr                                                                                   = [];
-                                    $tmpObj                                                                                   = new \stdClass();
-                                    $tmpObj->key                                                                              = $item['parameters'][0]['name'];
-                                    switch ($item['parameters'][0]['items']['type']) {
+                                }
+                            } elseif ($item['parameters'][0]['in'] == 'path') {
+                                $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['header']           = [];
+                                $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode']     = 'formdata';
+                                $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['formdata'] = [];
+                            }
+                        } else {
+                            $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['header']       = [];
+                            $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode'] = 'formdata';
+                            $tmpArr                                                                                   = [];
+                            $empty                                                                                    = '';
+                            foreach ($item['parameters'] as $parameter) {
+                                if ($parameter['in'] == 'formData') {
+                                    $tmpObj      = new \stdClass();
+                                    $tmpObj->key = $parameter['name'];
+                                    switch ($parameter['type']) {
                                         case 'integer':
-                                            $tmpObj->value = (integer)'';
+                                            $tmpObj->value = (integer)$empty;
                                             break;
                                         case 'boolean':
-                                            $tmpObj->value = (boolean)'';
+                                            $tmpObj->value = (boolean)$empty;
                                             break;
                                         default:
-                                            $tmpObj->value = '';
+                                            $tmpObj->value = $parameter['description'];
                                     }
                                     $tmpObj->type    = 'text';
-                                    $tmpObj->enabled = TRUE;
+                                    $tmpObj->enabled = $parameter['required'];
                                     $tmpArr[]        = $tmpObj;
-
-                                    $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['urlencoded'] = $tmpArr;
                                 }
                             }
-                        } elseif ($item['parameters'][0]['in'] == 'path') {
-                            $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['header']           = [];
-                            $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode']     = 'formdata';
-                            $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['formdata'] = [];
+                            $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['formdata'] = $tmpArr;
+                            unset($tmpArr);
+                            unset($empty);
                         }
-                    } else {
-                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['header']       = [];
-                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['mode'] = 'formdata';
-                        $tmpArr                                                                                   = [];
-                        $empty                                                                                    = '';
-                        foreach ($item['parameters'] as $parameter) {
-                            if ($parameter['in'] == 'formData') {
-                                $tmpObj      = new \stdClass();
-                                $tmpObj->key = $parameter['name'];
-                                switch ($parameter['type']) {
-                                    case 'integer':
-                                        $tmpObj->value = (integer)$empty;
-                                        break;
-                                    case 'boolean':
-                                        $tmpObj->value = (boolean)$empty;
-                                        break;
-                                    default:
-                                        $tmpObj->value = $parameter['description'];
-                                }
-                                $tmpObj->type    = 'text';
-                                $tmpObj->enabled = $parameter['required'];
-                                $tmpArr[]        = $tmpObj;
-                            }
-                        }
-                        $this->array->item[ $tag ]['item'][ $path ]['item'][ $method ]['request']['body']['formdata'] = $tmpArr;
-                        unset($tmpArr);
-                        unset($empty);
                     }
 
                     if (isset($item['responses']['default']['schema'])) {
